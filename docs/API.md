@@ -6,9 +6,10 @@ This document outlines the RESTful API endpoints for the AI-Builder backend.
 
 | Endpoint    | Method | Description                               |
 |:------------|:-------|:------------------------------------------|
-| `/register` | `POST` | Create a new user account.                |
+| `/signup`   | `POST` | Create a new user account.                |
 | `/login`    | `POST` | Authenticate user and return JWT/Session. |
 | `/me`       | `GET`  | Get current user profile.                 |
+| `/logout`   | `POST` | Logout current user and clear session.   |
 
 ## 2. Projects (`/api/projects`)
 
