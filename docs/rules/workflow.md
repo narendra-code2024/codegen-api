@@ -10,4 +10,3 @@ How the agent operates on this codebase. These apply to every task.
 4. **Validate.** After any change, run `./mvnw clean compile` to verify the build.
 5. **Schema discipline.** All database changes go in `src/main/resources/db/migration/`.
    Never modify an existing migration file — always create a new one.
-   _(Enforced by the `guard-migrations` PreToolUse hook in `.claude/`.)_
