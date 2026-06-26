@@ -8,8 +8,8 @@ This project uses **PostgreSQL** with an architecture optimized for an AI-driven
 Handles user identity and authentication.
 - `id` (UUID, PK): Primary identifier.
 - `email` (VARCHAR, Unique): User email.
-- `password_hash` (VARCHAR): Encrypted password.
-- `name` (VARCHAR): Display name.
+- `password` (VARCHAR): Encrypted password.
+- `username` (VARCHAR): User's handle/display name.
 - `created_at` (TIMESTAMP): Creation time.
 - `updated_at` (TIMESTAMP): Last update time.
 - `deleted_at` (TIMESTAMP): Soft delete timestamp.

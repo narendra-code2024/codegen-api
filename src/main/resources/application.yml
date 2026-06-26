@@ -3,9 +3,9 @@ spring:
     name: ai-builder
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/codegen}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:Password@123}
 
   jpa:
     hibernate:
