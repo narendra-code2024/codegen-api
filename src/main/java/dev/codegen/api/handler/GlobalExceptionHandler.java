@@ -1,17 +1,21 @@
 package dev.codegen.api.handler;
 
-import dev.codegen.api.dto.error.ErrorResponse;
+import dev.codegen.api.dto.ApiResponse;
+import dev.codegen.api.dto.FieldErrorDto;
+import dev.codegen.api.exception.DuplicateResourceException;
+import dev.codegen.api.exception.InvalidTokenException;
+import dev.codegen.api.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.util.List;
 
 @RestControllerAdvice
@@ -19,93 +23,84 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(
+    public ResponseEntity<ApiResponse<Void>> handleValidation(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
-        
-        List<ErrorResponse.FieldErrorDto> errors = ex.getBindingResult()
+
+        List<FieldErrorDto> fieldErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> ErrorResponse.FieldErrorDto.builder()
-                        .field(error.getField())
-                        .message(error.getDefaultMessage())
-                        .build())
+                .map(error -> new FieldErrorDto(error.getField(), error.getDefaultMessage()))
                 .toList();
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(Instant.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Validation failed")
-                .path(request.getRequestURI())
-                .validationErrors(errors)
-                .build();
+        log.warn("Validation failed for {}: {}", request.getRequestURI(), fieldErrors);
+        return ResponseEntity.badRequest().body(ApiResponse.error("Validation failed", fieldErrors));
+    }
 
-        log.warn("Validation failed for request {}: {}", request.getRequestURI(), errors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMalformedJson(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+        log.warn("Malformed request body for {}: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.badRequest().body(ApiResponse.error("Request body is missing or malformed"));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentialsException(
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(
             BadCredentialsException ex, HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(Instant.now())
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-
-        log.warn("Authentication failed for request {}: {}", request.getRequestURI(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        log.warn("Authentication failed for {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorResponse> handleResponseStatusException(
-            ResponseStatusException ex, HttpServletRequest request) {
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidToken(
+            InvalidTokenException ex, HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(Instant.now())
-                .status(ex.getStatusCode().value())
-                .error(HttpStatus.valueOf(ex.getStatusCode().value()).getReasonPhrase())
-                .message(ex.getReason())
-                .path(request.getRequestURI())
-                .build();
+        log.warn("Invalid token for {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
 
-        log.info("ResponseStatusException handled for request {}: {} - {}", 
-                request.getRequestURI(), ex.getStatusCode(), ex.getReason());
-        return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(
+            ResourceNotFoundException ex, HttpServletRequest request) {
+
+        log.warn("Resource not found for {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicate(
+            DuplicateResourceException ex, HttpServletRequest request) {
+
+        log.warn("Duplicate resource for {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(
             IllegalArgumentException ex, HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(Instant.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
+        log.warn("Illegal argument for {}: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
+    }
 
-        log.warn("IllegalArgumentException handled for request {}: {}", request.getRequestURI(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatus(
+            ResponseStatusException ex, HttpServletRequest request) {
+
+        log.info("ResponseStatusException for {}: {} - {}", request.getRequestURI(), ex.getStatusCode(), ex.getReason());
+        return buildErrorResponse(HttpStatus.valueOf(ex.getStatusCode().value()), ex.getReason());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(
+    public ResponseEntity<ApiResponse<Void>> handleGlobal(
             Exception ex, HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(Instant.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("An unexpected error occurred")
-                .path(request.getRequestURI())
-                .build();
+        log.error("Unhandled exception for {}", request.getRequestURI(), ex);
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+    }
 
-        log.error("Unhandled exception occurred during request {}", request.getRequestURI(), ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    private ResponseEntity<ApiResponse<Void>> buildErrorResponse(HttpStatus status, String message) {
+        return ResponseEntity.status(status).body(ApiResponse.error(message));
     }
 }

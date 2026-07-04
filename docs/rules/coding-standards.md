@@ -1,4 +1,4 @@
-# Architecture & API Rules
+# Coding Standards
 
 ## Layers
 
@@ -24,3 +24,13 @@ Pattern: `[Subject][Action][Suffix]` — keeps related files grouped alphabetica
 ## Validation
 
 Use Spring Boot Validation (`jakarta.validation`) on both DTOs and Entity fields.
+
+## Controller Parameter Ordering
+
+Always structure controller handler parameters in a predictable hierarchy from business inputs to system infrastructure:
+
+1. **Path Variables (`@PathVariable`):** Establish the resource scope mirroring the URI structure.
+2. **Payloads (`@Valid @RequestBody`):** Direct incoming request bodies.
+   * *Critical Spring Rule:* If a `BindingResult` or `Errors` argument is used, it **must** immediately follow the object it validates.
+3. **Filtering & Query (`@RequestParam`, `Pageable`):** Fixed query parameters or paging parameters.
+4. **System & Infrastructure Contexts:** Injected utilities (e.g. `@RequestHeader`, `@AuthenticationPrincipal`, `HttpServletRequest`, `HttpServletResponse`) positioned at the very end.

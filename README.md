@@ -9,7 +9,7 @@ Backend API for the AI-driven code generation platform.
 * **Spring Data JPA**
 * **Flyway** (Database migrations)
 * **MapStruct** & **Lombok** (DTO mapping and boilerplate generation)
-* **Spring Security & JJWT** (Stateless JWT token authentication)
+* **Spring Security & JJWT** (Stateless JWT authentication)
 
 ---
 
@@ -72,34 +72,8 @@ All database schema changes are managed via Flyway.
 
 ---
 
-## Postman Testing Setup
-
-To automate token injection for authenticated requests in Postman:
-
-### 1. Configure Login Request
-In your **`POST /api/auth/login`** request, navigate to the **Tests** tab and add this script:
-```javascript
-// Parse the JSON response
-var responseData = pm.response.json();
-
-// Store the token in environment variables if it exists
-if (responseData.accessToken) {
-    pm.environment.set("accessToken", responseData.accessToken);
-    console.log("Access token successfully stored as 'accessToken'!");
-}
-```
-
-### 2. Configure Authentication on Protected Requests
-For your other API endpoints (like `GET /api/auth/me` or `/api/projects`):
-* Navigate to the **Authorization** tab (either at the collection level or for individual requests).
-* Select **Type**: `Bearer Token`.
-* Set **Token**: `{{accessToken}}`.
-
-### 3. Configure Logout Request
-In your **`POST /api/auth/logout`** request, navigate to the **Tests** tab and add this script to clear the token in Postman:
-```javascript
-// Remove the saved access token on logout
-pm.environment.unset("accessToken");
-console.log("Logged out: accessToken cleared from environment.");
-```
-
+## Documentation
+* [API Design](docs/API.md) — REST endpoints overview
+* [Auth Design](docs/AUTH.md) — Token delivery model and security
+* [Schema Design](docs/SCHEMA.md) — Database schema and entity relationships
+* [Postman Testing Setup](docs/POSTMAN.md) — Authentication flows and environment setup

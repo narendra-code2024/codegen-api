@@ -8,8 +8,7 @@ Backend API for an AI-driven code generation platform.
 
 ## Rules (always apply)
 
-@docs/rules/workflow.md
-@docs/rules/architecture.md
+@docs/rules/coding-standards.md
 @docs/rules/persistence.md
 
 ## Build & Verify
@@ -28,4 +27,3 @@ Backend API for an AI-driven code generation platform.
 | Enums        | `src/main/java/dev/codegen/api/enums/`        |
 | Migrations   | `src/main/resources/db/migration/`            |
 | Resources    | `src/main/resources/`                         |
-

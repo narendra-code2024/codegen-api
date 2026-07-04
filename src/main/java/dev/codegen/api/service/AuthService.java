@@ -5,17 +5,17 @@ import dev.codegen.api.dto.auth.AuthResponse;
 import dev.codegen.api.dto.auth.SignupRequest;
 import dev.codegen.api.dto.auth.UserResponse;
 import dev.codegen.api.entity.User;
+import dev.codegen.api.exception.DuplicateResourceException;
+import dev.codegen.api.exception.ResourceNotFoundException;
 import dev.codegen.api.mapper.UserMapper;
 import dev.codegen.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +26,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public UserResponse signup(SignupRequest req) {
+        if (userRepository.findByEmail(req.email()).isPresent()) {
+            throw new DuplicateResourceException("Email is already registered");
+        }
         User user = userMapper.toEntity(req);
         user.setPassword(passwordEncoder.encode(req.password()));
         userRepository.save(user);
@@ -42,19 +46,26 @@ public class AuthService {
         User user = userRepository.findByEmail(req.email())
                 .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
 
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .authorities(java.util.Collections.emptyList())
-                .build();
+        String refreshToken = refreshTokenService.createRefreshToken(user);
+        String accessToken = jwtService.generateToken(user.getEmail());
 
-        String token = jwtService.generateToken(userDetails);
-        return new AuthResponse(token);
+        return new AuthResponse(accessToken, refreshToken);
+    }
+
+    public AuthResponse refreshToken(String token) {
+        RefreshTokenService.TokenRotation rotation = refreshTokenService.rotateToken(token);
+        String accessToken = jwtService.generateToken(rotation.user().getEmail());
+        return new AuthResponse(accessToken, rotation.newRefreshToken());
+    }
+
+    @Transactional
+    public void logout(String refreshToken) {
+        refreshTokenService.revokeToken(refreshToken);
     }
 
     public UserResponse getCurrentUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return userMapper.toResponse(user);
     }
 }

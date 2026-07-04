@@ -7,9 +7,12 @@ This document outlines the RESTful API endpoints for the AI-Builder backend.
 | Endpoint    | Method | Description                               |
 |:------------|:-------|:------------------------------------------|
 | `/signup`   | `POST` | Create a new user account.                |
-| `/login`    | `POST` | Authenticate user and return JWT/Session. |
+| `/login`    | `POST` | Authenticate user and return tokens.      |
+| `/refresh`  | `POST` | Refresh access token using refresh token. |
 | `/me`       | `GET`  | Get current user profile.                 |
-| `/logout`   | `POST` | Logout current user and clear session.   |
+| `/logout`   | `POST` | Logout current user and revoke tokens.    |
+
+> See [AUTH.md](AUTH.md) for the token delivery model and security details.
 
 ## 2. Projects (`/api/projects`)
 
@@ -21,7 +24,7 @@ This document outlines the RESTful API endpoints for the AI-Builder backend.
 | `/{id}`  | `PATCH`  | Update project metadata (e.g., rename).                                         |
 | `/{id}`  | `DELETE` | Soft-delete a project.                                                          |
 
-## 3. Files (`/api/projects/{projectId}/files`)
+## 3. Project Files (`/api/projects/{projectId}/files`)
 
 | Endpoint               | Method | Description                                   |
 |:-----------------------|:-------|:----------------------------------------------|
