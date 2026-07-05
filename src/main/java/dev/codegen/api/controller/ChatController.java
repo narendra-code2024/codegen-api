@@ -5,5 +5,4 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/chat")
-public class ChatController {
-}
+public class ChatController {}

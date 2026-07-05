@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.codegen.api.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,12 +14,10 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
 /**
- * Handles security exceptions (401/403) that occur in the Spring Security filter chain,
- * before requests reach controllers. Ensures these responses follow the same
- * {@link ApiResponse} envelope as controller-level exceptions.
+ * Handles security exceptions (401/403) that occur in the Spring Security filter chain, before
+ * requests reach controllers. Ensures these responses follow the same {@link ApiResponse} envelope
+ * as controller-level exceptions.
  */
 @Component
 @RequiredArgsConstructor
@@ -27,18 +26,25 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
     private final ObjectMapper objectMapper;
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException authException) throws IOException {
+    public void commence(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException authException)
+            throws IOException {
         writeResponse(response, HttpStatus.UNAUTHORIZED, "Authentication is required");
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response,
-                       AccessDeniedException accessDeniedException) throws IOException {
+    public void handle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AccessDeniedException accessDeniedException)
+            throws IOException {
         writeResponse(response, HttpStatus.FORBIDDEN, "Access denied");
     }
 
-    private void writeResponse(HttpServletResponse response, HttpStatus status, String message) throws IOException {
+    private void writeResponse(HttpServletResponse response, HttpStatus status, String message)
+            throws IOException {
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(response.getOutputStream(), ApiResponse.error(message));

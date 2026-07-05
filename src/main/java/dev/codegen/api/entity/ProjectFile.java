@@ -1,13 +1,12 @@
 package dev.codegen.api.entity;
 
 import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "project_files")
@@ -33,8 +32,7 @@ public class ProjectFile {
 
     private String mimeType;
 
-    @UpdateTimestamp
-    private Instant updatedAt;
+    @UpdateTimestamp private Instant updatedAt;
 
     private Instant deletedAt;
 }

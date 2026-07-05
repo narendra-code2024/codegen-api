@@ -19,3 +19,12 @@
 - **Collections:** Use `Set` for `@ManyToMany` and `@OneToMany`.
 - **Naming:** Explicit snake_case via `@Table(name = "...")` and `@Column(name = "...")`.
 - **Types:** `@Enumerated(EnumType.STRING)` for enums; `@JdbcTypeCode(SqlTypes.JSON)` for JSONB.
+
+## Database Migrations
+
+All database schema changes are managed via **Flyway**.
+- **Location:** Migration scripts reside in `src/main/resources/db/migration/`.
+- **Rules:**
+  - **Important:** Never edit an existing migration script once applied.
+  - Always create a new versioned file (e.g. `V2__add_new_columns.sql`) for any schema modifications.
+  - Naming pattern: `V<Version>__<description>.sql`.

@@ -1,7 +1,7 @@
 package dev.codegen.api.service;
 
-import dev.codegen.api.dto.auth.LoginRequest;
 import dev.codegen.api.dto.auth.AuthResponse;
+import dev.codegen.api.dto.auth.LoginRequest;
 import dev.codegen.api.dto.auth.SignupRequest;
 import dev.codegen.api.dto.auth.UserResponse;
 import dev.codegen.api.entity.User;
@@ -32,6 +32,7 @@ public class AuthService {
         if (userRepository.findByEmail(req.email()).isPresent()) {
             throw new DuplicateResourceException("Email is already registered");
         }
+
         User user = userMapper.toEntity(req);
         user.setPassword(passwordEncoder.encode(req.password()));
         userRepository.save(user);
@@ -40,11 +41,12 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest req) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.email(), req.password())
-        );
+                new UsernamePasswordAuthenticationToken(req.email(), req.password()));
 
-        User user = userRepository.findByEmail(req.email())
-                .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
+        User user =
+                userRepository
+                        .findByEmail(req.email())
+                        .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
 
         String refreshToken = refreshTokenService.createRefreshToken(user);
         String accessToken = jwtService.generateToken(user.getEmail());
@@ -64,8 +66,10 @@ public class AuthService {
     }
 
     public UserResponse getCurrentUser(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return userMapper.toResponse(user);
     }
 }

@@ -2,13 +2,12 @@ package dev.codegen.api.entity;
 
 import dev.codegen.api.enums.PreviewStatus;
 import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "previews")
@@ -30,8 +29,7 @@ public class Preview {
     @Enumerated(EnumType.STRING)
     private PreviewStatus status;
 
-    @CreationTimestamp
-    private Instant startedAt;
+    @CreationTimestamp private Instant startedAt;
 
     private Instant expiresAt;
 }

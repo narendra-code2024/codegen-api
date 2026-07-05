@@ -5,5 +5,4 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/history")
-public class HistoryController {
-}
+public class HistoryController {}

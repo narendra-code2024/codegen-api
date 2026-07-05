@@ -2,15 +2,14 @@ package dev.codegen.api.entity;
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
-
-import java.time.Instant;
-import java.util.Map;
-import java.util.UUID;
 
 @Entity
 @Table(name = "commits")
@@ -35,6 +34,5 @@ public class Commit {
     @Column(columnDefinition = "jsonb")
     private Map<String, String> snapshotData;
 
-    @CreationTimestamp
-    private Instant createdAt;
+    @CreationTimestamp private Instant createdAt;
 }

@@ -6,6 +6,7 @@ import dev.codegen.api.exception.DuplicateResourceException;
 import dev.codegen.api.exception.InvalidTokenException;
 import dev.codegen.api.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -26,14 +25,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleValidation(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-        List<FieldErrorDto> fieldErrors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> new FieldErrorDto(error.getField(), error.getDefaultMessage()))
-                .toList();
+        List<FieldErrorDto> fieldErrors =
+                ex.getBindingResult().getFieldErrors().stream()
+                        .map(
+                                error ->
+                                        new FieldErrorDto(
+                                                error.getField(), error.getDefaultMessage()))
+                        .toList();
 
         log.warn("Validation failed for {}: {}", request.getRequestURI(), fieldErrors);
-        return ResponseEntity.badRequest().body(ApiResponse.error("Validation failed", fieldErrors));
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error("Validation failed", fieldErrors));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -41,7 +43,8 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException ex, HttpServletRequest request) {
 
         log.warn("Malformed request body for {}: {}", request.getRequestURI(), ex.getMessage());
-        return ResponseEntity.badRequest().body(ApiResponse.error("Request body is missing or malformed"));
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error("Request body is missing or malformed"));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -88,7 +91,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleResponseStatus(
             ResponseStatusException ex, HttpServletRequest request) {
 
-        log.info("ResponseStatusException for {}: {} - {}", request.getRequestURI(), ex.getStatusCode(), ex.getReason());
+        log.info(
+                "ResponseStatusException for {}: {} - {}",
+                request.getRequestURI(),
+                ex.getStatusCode(),
+                ex.getReason());
         return buildErrorResponse(HttpStatus.valueOf(ex.getStatusCode().value()), ex.getReason());
     }
 
@@ -100,7 +107,8 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
     }
 
-    private ResponseEntity<ApiResponse<Void>> buildErrorResponse(HttpStatus status, String message) {
+    private ResponseEntity<ApiResponse<Void>> buildErrorResponse(
+            HttpStatus status, String message) {
         return ResponseEntity.status(status).body(ApiResponse.error(message));
     }
 }

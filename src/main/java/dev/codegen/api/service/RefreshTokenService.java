@@ -4,14 +4,13 @@ import dev.codegen.api.entity.RefreshToken;
 import dev.codegen.api.entity.User;
 import dev.codegen.api.exception.InvalidTokenException;
 import dev.codegen.api.repository.RefreshTokenRepository;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +39,10 @@ public class RefreshTokenService {
 
     @Transactional
     public TokenRotation rotateToken(String tokenString) {
-        RefreshToken token = refreshTokenRepository.findByToken(tokenString)
-                .orElseThrow(() -> new InvalidTokenException("Invalid refresh token"));
+        RefreshToken token =
+                refreshTokenRepository
+                        .findByToken(tokenString)
+                        .orElseThrow(() -> new InvalidTokenException("Invalid refresh token"));
 
         verifyExpiration(token);
 
@@ -53,7 +54,8 @@ public class RefreshTokenService {
     @Transactional
     public void revokeToken(String tokenString) {
         if (tokenString != null && !tokenString.isBlank()) {
-            refreshTokenRepository.findByToken(tokenString)
+            refreshTokenRepository
+                    .findByToken(tokenString)
                     .ifPresent(token -> refreshTokenRepository.deleteByUser(token.getUser()));
         }
     }

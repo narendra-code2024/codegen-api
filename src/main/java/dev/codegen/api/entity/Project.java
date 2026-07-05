@@ -2,14 +2,13 @@ package dev.codegen.api.entity;
 
 import dev.codegen.api.enums.ProjectStatus;
 import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "projects")
@@ -33,11 +32,9 @@ public class Project {
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
 
-    @CreationTimestamp
-    private Instant createdAt;
+    @CreationTimestamp private Instant createdAt;
 
-    @UpdateTimestamp
-    private Instant updatedAt;
+    @UpdateTimestamp private Instant updatedAt;
 
     private Instant deletedAt;
 }

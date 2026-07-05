@@ -65,12 +65,32 @@ java -jar target/codegen-api-0.0.1-SNAPSHOT.jar
 
 ---
 
-## Database Migrations
-All database schema changes are managed via Flyway. 
-* Migration scripts reside in `src/main/resources/db/migration/`.
-* **Important:** Never edit an existing migration script once applied. Always create a new versioned file (e.g. `V2__add_new_columns.sql`) for any schema modifications.
+## Code Quality & Formatting
 
----
+To maintain a consistent style and catch potential bugs early, the project utilizes:
+* **Spotless** (with Google Java Format) for auto-formatting
+* **Spotbugs** for static code analysis
+
+### Running Checks Manually
+```bash
+# Auto-format all Java files
+./mvnw spotless:apply
+
+# Run Spotbugs static analysis
+./mvnw spotbugs:check
+```
+
+## Pre-push Validation
+
+Before pushing code or submitting a PR, it is recommended to run all quality and test checks. You can run them all in a single command:
+
+```bash
+# On Linux/macOS or Git Bash/PowerShell:
+./mvnw clean spotless:apply test spotbugs:check
+
+# On Windows Command Prompt:
+mvnw.cmd clean spotless:apply test spotbugs:check
+```
 
 ## Documentation
 * [API Design](docs/API.md) — REST endpoints overview

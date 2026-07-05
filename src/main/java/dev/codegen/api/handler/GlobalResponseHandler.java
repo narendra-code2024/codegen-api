@@ -18,7 +18,8 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
     private final ObjectMapper objectMapper;
 
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(
+            MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return true;
     }
 
@@ -29,8 +30,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
             MediaType selectedContentType,
             Class<? extends HttpMessageConverter<?>> selectedConverterType,
             ServerHttpRequest request,
-            ServerHttpResponse response
-    ) {
+            ServerHttpResponse response) {
         // Null body (e.g. 204 No Content) — don't wrap
         if (body == null) {
             return null;
@@ -43,7 +43,9 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
 
         // Exclude raw response formats (Swagger, Actuator)
         String path = request.getURI().getPath();
-        if (path.contains("/v3/api-docs") || path.contains("/swagger-ui") || path.contains("/actuator")) {
+        if (path.contains("/v3/api-docs")
+                || path.contains("/swagger-ui")
+                || path.contains("/actuator")) {
             return body;
         }
 

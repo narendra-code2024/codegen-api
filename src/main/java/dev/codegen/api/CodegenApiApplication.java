@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class CodegenApiApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CodegenApiApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(CodegenApiApplication.class, args);
+    }
 }

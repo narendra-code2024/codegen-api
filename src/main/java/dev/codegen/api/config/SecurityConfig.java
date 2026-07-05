@@ -23,22 +23,31 @@ public class SecurityConfig {
     private final SecurityExceptionHandler securityExceptionHandler;
 
     @Bean
+    @SuppressWarnings("java:S4502") // API is stateless and uses Bearer tokens
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(securityExceptionHandler)
-                .accessDeniedHandler(securityExceptionHandler)
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        http.csrf(AbstractHttpConfigurer::disable);
+
+        http.authorizeHttpRequests(
+                auth ->
+                        auth.requestMatchers(
+                                        "/api/auth/signup",
+                                        "/api/auth/login",
+                                        "/api/auth/refresh",
+                                        "/api/auth/logout")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated());
+
+        http.exceptionHandling(
+                ex ->
+                        ex.authenticationEntryPoint(securityExceptionHandler)
+                                .accessDeniedHandler(securityExceptionHandler));
+
+        http.sessionManagement(
+                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http.authenticationProvider(authenticationProvider);
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

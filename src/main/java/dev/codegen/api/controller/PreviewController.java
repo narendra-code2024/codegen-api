@@ -5,5 +5,4 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/preview")
-public class PreviewController {
-}
+public class PreviewController {}

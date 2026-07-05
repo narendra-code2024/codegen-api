@@ -9,6 +9,7 @@ import dev.codegen.api.exception.InvalidTokenException;
 import dev.codegen.api.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -24,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -50,8 +49,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest data,
             @RequestHeader(value = "X-Client-Type", required = false) String clientType,
-            HttpServletResponse response
-    ) {
+            HttpServletResponse response) {
         AuthResponse authResponse = this.authService.login(data);
         AuthResponse responseBody = prepareTokenResponse(authResponse, clientType, response);
         return ResponseEntity.ok(responseBody);
@@ -62,8 +60,7 @@ public class AuthController {
             @RequestBody(required = false) TokenRefreshRequest data,
             @RequestHeader(value = "X-Client-Type", required = false) String clientType,
             @CookieValue(value = "refresh_token", required = false) String refreshTokenCookie,
-            HttpServletResponse response
-    ) {
+            HttpServletResponse response) {
         String refreshToken = extractRefreshToken(data, refreshTokenCookie);
         AuthResponse authResponse = this.authService.refreshToken(refreshToken);
         AuthResponse responseBody = prepareTokenResponse(authResponse, clientType, response);
@@ -80,8 +77,7 @@ public class AuthController {
     public ResponseEntity<Void> logout(
             @RequestBody(required = false) TokenRefreshRequest data,
             @CookieValue(value = "refresh_token", required = false) String refreshTokenCookie,
-            HttpServletResponse response
-    ) {
+            HttpServletResponse response) {
         try {
             String refreshToken = extractRefreshToken(data, refreshTokenCookie);
             this.authService.logout(refreshToken);
@@ -93,14 +89,16 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    private void setRefreshTokenCookie(HttpServletResponse response, String value, Duration maxAge) {
-        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, value)
-                .httpOnly(true)
-                .secure(true)
-                .path(REFRESH_TOKEN_COOKIE_PATH)
-                .maxAge(maxAge)
-                .sameSite("Strict")
-                .build();
+    private void setRefreshTokenCookie(
+            HttpServletResponse response, String value, Duration maxAge) {
+        ResponseCookie cookie =
+                ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, value)
+                        .httpOnly(true)
+                        .secure(true)
+                        .path(REFRESH_TOKEN_COOKIE_PATH)
+                        .maxAge(maxAge)
+                        .sameSite("Strict")
+                        .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
@@ -121,10 +119,7 @@ public class AuthController {
     }
 
     private AuthResponse prepareTokenResponse(
-            AuthResponse authResponse,
-            String clientType,
-            HttpServletResponse response
-    ) {
+            AuthResponse authResponse, String clientType, HttpServletResponse response) {
         if ("web".equalsIgnoreCase(clientType)) {
             setRefreshTokenCookie(response, authResponse.refreshToken(), refreshExpiration);
             return new AuthResponse(authResponse.accessToken(), null);
