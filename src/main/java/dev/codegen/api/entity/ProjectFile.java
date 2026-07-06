@@ -32,7 +32,8 @@ public class ProjectFile {
 
     private String mimeType;
 
-    @UpdateTimestamp private Instant updatedAt;
+    @UpdateTimestamp
+    private Instant updatedAt;
 
     private Instant deletedAt;
 }

@@ -34,5 +34,6 @@ public class Commit {
     @Column(columnDefinition = "jsonb")
     private Map<String, String> snapshotData;
 
-    @CreationTimestamp private Instant createdAt;
+    @CreationTimestamp
+    private Instant createdAt;
 }
