@@ -19,8 +19,6 @@ The container for a generated application.
 - `id` (UUID, PK): Primary identifier.
 - `owner_id` (UUID, FK): Links to `users.id`.
 - `name` (VARCHAR): Project name.
-- `framework` (VARCHAR): Target framework (e.g., 'nextjs').
-- `status` (VARCHAR): `INITIALIZING`, `ACTIVE`, `ARCHIVED`.
 - `created_at`, `updated_at`, `deleted_at`: Audit fields.
 
 ### `chat_sessions`
@@ -79,4 +77,3 @@ Tracks the execution environment for live previews.
 - **In-DB Code Storage**: Storing source code as `TEXT` in `project_files` allows the backend to build AI prompts without external storage latency.
 - **JSONB Snapshots**: Using PostgreSQL's JSONB for `snapshot_data` allows for flexible "point-in-time" recovery of the entire file tree.
 - **UUIDs**: Native UUID generation (`gen_random_uuid()`) ensures non-guessable URLs and IDs.
-- **Lowercase Roles**: `MessageRole` enum is persisted as lowercase strings to match standard LLM API expectations.

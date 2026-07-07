@@ -37,6 +37,7 @@ public class AuthController {
     private Duration refreshExpiration;
 
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
+
     private static final String REFRESH_TOKEN_COOKIE_PATH = "/api/auth";
 
     @PostMapping("/signup")

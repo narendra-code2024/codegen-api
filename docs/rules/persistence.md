@@ -20,6 +20,14 @@
 - **Naming:** Explicit snake_case via `@Table(name = "...")` and `@Column(name = "...")`.
 - **Types:** `@Enumerated(EnumType.STRING)` for enums; `@JdbcTypeCode(SqlTypes.JSON)` for JSONB.
 
+## Transaction Management
+
+- **Use `@Transactional` on all write operations:** Ensure multi-step modifications (e.g., creating a project and a chat session together) are atomic. If any step fails, the entire block is rolled back.
+- **Always specify `readOnly = true` for read-only queries:**
+  - Disables Hibernate dirty checking (saving memory and CPU).
+  - Optimizes database execution and locks.
+  - Allows routing to read-only database replicas in production.
+
 ## Database Migrations
 
 All database schema changes are managed via **Flyway**.

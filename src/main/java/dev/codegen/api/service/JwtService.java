@@ -1,11 +1,13 @@
 package dev.codegen.api.service;
 
+import dev.codegen.api.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,10 +21,11 @@ public class JwtService {
     @Value("${security.jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(String subject) {
+    public String generateToken(User user) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .subject(subject)
+                .subject(user.getEmail())
+                .claim("userId", user.getId().toString())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(jwtExpiration)))
                 .signWith(getSigningKey())
@@ -31,6 +34,11 @@ public class JwtService {
 
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
+    }
+
+    public UUID extractUserId(String token) {
+        String userIdStr = extractAllClaims(token).get("userId", String.class);
+        return userIdStr != null ? UUID.fromString(userIdStr) : null;
     }
 
     private Claims extractAllClaims(String token) {

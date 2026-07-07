@@ -1,6 +1,5 @@
 package dev.codegen.api.entity;
 
-import dev.codegen.api.enums.ProjectStatus;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
@@ -8,10 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "projects")
+@SQLRestriction("deleted_at IS NULL")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,16 +28,9 @@ public class Project {
 
     private String name;
 
-    private String framework;
+    @CreationTimestamp private Instant createdAt;
 
-    @Enumerated(EnumType.STRING)
-    private ProjectStatus status;
-
-    @CreationTimestamp
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    private Instant updatedAt;
+    @UpdateTimestamp private Instant updatedAt;
 
     private Instant deletedAt;
 }

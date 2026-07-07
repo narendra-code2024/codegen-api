@@ -22,10 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserMapper userMapper;
+
     private final UserRepository userRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final AuthenticationManager authenticationManager;
+
     private final JwtService jwtService;
+
     private final RefreshTokenService refreshTokenService;
 
     public UserResponse signup(SignupRequest req) {
@@ -49,14 +54,14 @@ public class AuthService {
                         .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
 
         String refreshToken = refreshTokenService.createRefreshToken(user);
-        String accessToken = jwtService.generateToken(user.getEmail());
+        String accessToken = jwtService.generateToken(user);
 
         return new AuthResponse(accessToken, refreshToken);
     }
 
     public AuthResponse refreshToken(String token) {
         RefreshTokenService.TokenRotation rotation = refreshTokenService.rotateToken(token);
-        String accessToken = jwtService.generateToken(rotation.user().getEmail());
+        String accessToken = jwtService.generateToken(rotation.user());
         return new AuthResponse(accessToken, rotation.newRefreshToken());
     }
 

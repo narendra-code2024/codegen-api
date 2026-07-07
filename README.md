@@ -37,7 +37,19 @@ Starts the Spring Boot embedded Tomcat server in development mode:
 mvnw.cmd spring-boot:run
 ```
 
-### 3. Run Unit and Integration Tests
+### 3. Database Migration & Management (Flyway)
+To clean or repair your database schema locally:
+```bash
+# On Linux/macOS or Git Bash/PowerShell:
+./mvnw flyway:clean  # WARNING: NEVER run in production! (Drops all tables and data)
+./mvnw flyway:repair
+
+# On Windows Command Prompt:
+mvnw.cmd flyway:clean  # WARNING: NEVER run in production! (Drops all tables and data)
+mvnw.cmd flyway:repair
+```
+
+### 4. Run Unit and Integration Tests
 Executes the test suite:
 ```bash
 # On Linux/macOS or Git Bash/PowerShell:

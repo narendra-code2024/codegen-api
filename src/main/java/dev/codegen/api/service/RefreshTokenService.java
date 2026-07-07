@@ -25,7 +25,7 @@ public class RefreshTokenService {
 
     @Transactional
     public String createRefreshToken(User user) {
-        // Delete any existing refresh tokens for the user to enforce single session / revoke old
+        // Delete any existing refresh tokens for the user to enforce single session
         refreshTokenRepository.deleteByUser(user);
 
         RefreshToken refreshToken = new RefreshToken();

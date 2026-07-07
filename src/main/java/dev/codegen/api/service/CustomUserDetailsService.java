@@ -1,8 +1,8 @@
 package dev.codegen.api.service;
 
+import dev.codegen.api.config.CustomUserDetails;
 import dev.codegen.api.entity.User;
 import dev.codegen.api.repository.UserRepository;
-import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,10 +23,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                         .findByEmail(username)
                         .orElseThrow(() -> new UsernameNotFoundException("Bad credentials"));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .authorities(Collections.emptyList())
-                .build();
+        return new CustomUserDetails(user);
     }
 }

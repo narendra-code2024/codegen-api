@@ -185,7 +185,6 @@
 					<java>
 						<googleJavaFormat>
 							<style>AOSP</style>
-							<formatAnnotations/>
 						</googleJavaFormat>
 					</java>
 				</configuration>

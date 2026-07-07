@@ -18,8 +18,6 @@ CREATE TABLE projects (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_id          UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name              VARCHAR(255) NOT NULL,
-    framework         VARCHAR(50) DEFAULT 'nextjs',
-    status            VARCHAR(20) NOT NULL DEFAULT 'INITIALIZING',
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at        TIMESTAMP NULL
