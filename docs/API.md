@@ -9,8 +9,8 @@ This document outlines the RESTful API endpoints for the AI-Builder backend.
 | `/signup`   | `POST` | Create a new user account.                |
 | `/login`    | `POST` | Authenticate user and return tokens.      |
 | `/refresh`  | `POST` | Refresh access token using refresh token. |
-| `/me`       | `GET`  | Get current user profile.                 |
 | `/logout`   | `POST` | Logout current user and revoke tokens.    |
+| `/me`       | `GET`  | Get current user profile.                 |
 
 > See [AUTH.md](AUTH.md) for the token delivery model and security details.
 

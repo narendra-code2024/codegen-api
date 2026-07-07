@@ -9,6 +9,7 @@ import dev.codegen.api.exception.DuplicateResourceException;
 import dev.codegen.api.exception.ResourceNotFoundException;
 import dev.codegen.api.mapper.UserMapper;
 import dev.codegen.api.repository.UserRepository;
+import dev.codegen.api.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -29,7 +30,7 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
 
-    private final JwtService jwtService;
+    private final TokenProvider tokenProvider;
 
     private final RefreshTokenService refreshTokenService;
 
@@ -54,14 +55,14 @@ public class AuthService {
                         .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
 
         String refreshToken = refreshTokenService.createRefreshToken(user);
-        String accessToken = jwtService.generateToken(user);
+        String accessToken = tokenProvider.generateAccessToken(user);
 
         return new AuthResponse(accessToken, refreshToken);
     }
 
     public AuthResponse refreshToken(String token) {
         RefreshTokenService.TokenRotation rotation = refreshTokenService.rotateToken(token);
-        String accessToken = jwtService.generateToken(rotation.user());
+        String accessToken = tokenProvider.generateAccessToken(rotation.user());
         return new AuthResponse(accessToken, rotation.newRefreshToken());
     }
 

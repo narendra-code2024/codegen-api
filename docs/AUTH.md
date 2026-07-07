@@ -7,46 +7,25 @@ This document describes the authentication architecture for the Codegen API.
 - **Access token**: Short-lived JWT (15 min), used for authenticating API requests.
 - **Refresh token**: Long-lived opaque token (7 days), stored in the database, used to obtain new access tokens. Rotated on every use.
 
-## Token Delivery Model
+## Token Delivery
 
-A single set of endpoints (`/api/auth/*`) serves both web and mobile clients. The `X-Client-Type` header determines how tokens are delivered:
+All tokens are returned in the JSON body. No httpOnly cookies. The client is responsible for secure token storage (in-memory for SPAs, OS keychain for mobile).
 
-| Aspect                         | Mobile / API (default)                  | Web (`X-Client-Type: web`)              |
-|:-------------------------------|:----------------------------------------|:----------------------------------------|
-| **Access token delivery**      | JSON body                               | JSON body                               |
-| **Refresh token delivery**     | JSON body                               | `HttpOnly` cookie (path: `/api/auth`)   |
-| **Access token on requests**   | `Authorization: Bearer` header          | `Authorization: Bearer` header          |
-| **Refresh token on `/refresh`**| JSON body `{ "refreshToken": "..." }`   | Cookie (sent automatically)             |
-| **Refresh token on `/logout`** | JSON body `{ "refreshToken": "..." }`   | Cookie (sent automatically)             |
+| Detail                      | Mechanism                         |
+|:----------------------------|:----------------------------------|
+| **Access token delivery**   | JSON body                         |
+| **Refresh token delivery**  | JSON body                         |
+| **Access token on requests**| `Authorization: Bearer` header    |
+| **Refresh on `/refresh`**   | JSON body `{ "refreshToken" }`    |
+| **Refresh on `/logout`**    | JSON body `{ "refreshToken" }`    |
 
 ## Security
 
-- Access tokens are **never stored in cookies**. All clients send them via the `Authorization: Bearer` header, eliminating CSRF risk on data endpoints.
-- The refresh token `HttpOnly` cookie is scoped to `/api/auth` and uses `SameSite=Strict; Secure`.
+- Access tokens are **never stored in cookies**. All clients send them via the `Authorization: Bearer` header, eliminating CSRF risk.
 - Refresh tokens are **rotated on every use** — the old token is deleted and a new one is issued.
 - Only one refresh token per user is active at a time (single-session enforcement).
 
-## Web SPA Flow
-
-```
-1. POST /api/auth/login  (X-Client-Type: web)
-   ← Body: { "accessToken": "..." }
-   ← Set-Cookie: refresh_token=...; HttpOnly; Secure; SameSite=Strict; Path=/api/auth
-
-2. GET /api/projects  (Authorization: Bearer <accessToken>)
-   ← 200 OK
-
-3. POST /api/auth/refresh  (X-Client-Type: web)
-   → Cookie: refresh_token=... (sent automatically by browser)
-   ← Body: { "accessToken": "..." }
-   ← Set-Cookie: refresh_token=<new>; ...
-
-4. POST /api/auth/logout
-   → Cookie: refresh_token=... (sent automatically by browser)
-   ← Set-Cookie: refresh_token=; Max-Age=0
-```
-
-## Mobile / API Flow
+## Standard Flow
 
 ```
 1. POST /api/auth/login

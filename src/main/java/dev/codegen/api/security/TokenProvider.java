@@ -1,4 +1,4 @@
-package dev.codegen.api.service;
+package dev.codegen.api.security;
 
 import dev.codegen.api.entity.User;
 import io.jsonwebtoken.Claims;
@@ -10,10 +10,10 @@ import java.util.Date;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class JwtService {
+@Component
+public class TokenProvider {
 
     @Value("${security.jwt.secret}")
     private String secretKey;
@@ -21,7 +21,7 @@ public class JwtService {
     @Value("${security.jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(User user) {
+    public String generateAccessToken(User user) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(user.getEmail())
@@ -32,21 +32,20 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
-    }
+    public CustomUserDetails verifyAccessToken(String token) {
+        Claims claims =
+                Jwts.parser()
+                        .verifyWith(getSigningKey())
+                        .build()
+                        .parseSignedClaims(token)
+                        .getPayload();
 
-    public UUID extractUserId(String token) {
-        String userIdStr = extractAllClaims(token).get("userId", String.class);
-        return userIdStr != null ? UUID.fromString(userIdStr) : null;
-    }
-
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        String username = claims.getSubject();
+        String userIdStr = claims.get("userId", String.class);
+        if (username == null || userIdStr == null) {
+            return null;
+        }
+        return new CustomUserDetails(UUID.fromString(userIdStr), username, "");
     }
 
     private SecretKey getSigningKey() {

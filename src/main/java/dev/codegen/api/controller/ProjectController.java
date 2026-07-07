@@ -1,9 +1,9 @@
 package dev.codegen.api.controller;
 
-import dev.codegen.api.config.CustomUserDetails;
 import dev.codegen.api.dto.project.CreateProjectRequest;
 import dev.codegen.api.dto.project.ProjectResponse;
 import dev.codegen.api.dto.project.UpdateProjectRequest;
+import dev.codegen.api.security.CustomUserDetails;
 import dev.codegen.api.service.ProjectService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -31,21 +31,21 @@ public class ProjectController {
     @GetMapping
     public ResponseEntity<List<ProjectResponse>> getProjects(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(projectService.getProjects(userDetails.getId()));
+        return ResponseEntity.ok(projectService.getProjects(userDetails.id()));
     }
 
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(
             @Valid @RequestBody CreateProjectRequest data,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        ProjectResponse response = projectService.createProject(data, userDetails.getId());
+        ProjectResponse response = projectService.createProject(data, userDetails.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProject(
             @PathVariable UUID id, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(projectService.getProject(id, userDetails.getId()));
+        return ResponseEntity.ok(projectService.getProject(id, userDetails.id()));
     }
 
     @PatchMapping("/{id}")
@@ -53,13 +53,13 @@ public class ProjectController {
             @PathVariable UUID id,
             @RequestBody UpdateProjectRequest data,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(projectService.updateProject(id, data, userDetails.getId()));
+        return ResponseEntity.ok(projectService.updateProject(id, data, userDetails.id()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(
             @PathVariable UUID id, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        projectService.deleteProject(id, userDetails.getId());
+        projectService.deleteProject(id, userDetails.id());
         return ResponseEntity.noContent().build();
     }
 }

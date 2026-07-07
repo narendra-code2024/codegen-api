@@ -1,8 +1,8 @@
 package dev.codegen.api.service;
 
-import dev.codegen.api.config.CustomUserDetails;
 import dev.codegen.api.entity.User;
 import dev.codegen.api.repository.UserRepository;
+import dev.codegen.api.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -7,30 +7,10 @@ import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class CustomUserDetails implements UserDetails {
-
-    private final UUID id;
-    private final String email;
-    private final String password;
-
-    public CustomUserDetails(UUID id, String email, String password) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-    }
+public record CustomUserDetails(UUID id, String email, String password) implements UserDetails {
 
     public CustomUserDetails(User user) {
-        this.id = user.getId();
-        this.email = user.getEmail();
-        this.password = user.getPassword();
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
+        this(user.getId(), user.getEmail(), user.getPassword());
     }
 
     @Override
