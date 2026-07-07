@@ -26,11 +26,9 @@ public class User {
 
     private String username;
 
-    @CreationTimestamp
-    private Instant createdAt;
+    @CreationTimestamp private Instant createdAt;
 
-    @UpdateTimestamp
-    private Instant updatedAt;
+    @UpdateTimestamp private Instant updatedAt;
 
     private Instant deletedAt;
 }

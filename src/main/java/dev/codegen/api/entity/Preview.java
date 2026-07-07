@@ -29,8 +29,7 @@ public class Preview {
     @Enumerated(EnumType.STRING)
     private PreviewStatus status;
 
-    @CreationTimestamp
-    private Instant startedAt;
+    @CreationTimestamp private Instant startedAt;
 
     private Instant expiresAt;
 }

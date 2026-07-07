@@ -34,6 +34,5 @@ public class ChatMessage {
 
     private Integer completionTokens;
 
-    @CreationTimestamp
-    private Instant createdAt;
+    @CreationTimestamp private Instant createdAt;
 }
