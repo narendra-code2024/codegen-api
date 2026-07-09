@@ -16,7 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final TokenProvider tokenProvider;
+    private final AuthUtil authUtil;
 
     @Override
     protected void doFilterInternal(
@@ -34,7 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt = authHeader.substring(7);
 
         try {
-            CustomUserDetails userDetails = tokenProvider.verifyAccessToken(jwt);
+            CustomUserDetails userDetails = authUtil.verifyAccessToken(jwt);
 
             if (userDetails != null
                     && SecurityContextHolder.getContext().getAuthentication() == null) {

@@ -16,15 +16,28 @@ This document outlines the RESTful API endpoints for the AI-Builder backend.
 
 ## 2. Projects (`/api/projects`)
 
+Access is controlled via membership. Any member (OWNER, EDITOR, VIEWER) can read. OWNER and EDITOR can write. Only OWNER can delete.
+
 | Endpoint | Method   | Description                                                                     |
 |:---------|:---------|:--------------------------------------------------------------------------------|
-| `/`      | `GET`    | List all projects owned by the user.                                            |
+| `/`      | `GET`    | List all projects the user is a member of.                                      |
 | `/`      | `POST`   | **Action**: Create new project. *Note: Also bootstraps the first Chat Session.* |
 | `/{id}`  | `GET`    | Get metadata for a specific project.                                            |
 | `/{id}`  | `PATCH`  | Update project metadata (e.g., rename).                                         |
-| `/{id}`  | `DELETE` | Soft-delete a project.                                                          |
+| `/{id}`  | `DELETE` | Soft-delete a project (OWNER only).                                             |
 
-## 3. Project Files (`/api/projects/{projectId}/files`)
+## 3. Project Members (`/api/projects/{projectId}/members`)
+
+| Endpoint       | Method | Description                                      | Auth        |
+|:---------------|:-------|:-------------------------------------------------|:------------|
+| `/`            | `GET`  | List members of the project.                     | Any member  |
+| `/`            | `POST` | Invite a user by email `{ "email", "role" }`.    | OWNER only  |
+| `/{memberId}`  | `PATCH`| Change a member's role `{ "role" }`.             | OWNER only  |
+| `/{memberId}`  | `DELETE`| Remove a member from the project.               | OWNER only  |
+
+> Roles: `OWNER` (full control), `EDITOR` (read/write), `VIEWER` (read-only).
+
+## 4. Project Files (`/api/projects/{projectId}/files`)
 
 | Endpoint               | Method | Description                                   |
 |:-----------------------|:-------|:----------------------------------------------|
@@ -34,7 +47,7 @@ This document outlines the RESTful API endpoints for the AI-Builder backend.
 
 > **Why Query Params?** Using `?path=src/app/page.tsx` avoids issues with slashes (`/`) breaking REST routing and is the standard way to handle lookups for deeply nested resources.
 
-## 4. Chat & AI (`/api/projects/{projectId}/chat`)
+## 5. Chat & AI (`/api/projects/{projectId}/chat`)
 
 The frontend interacts with the Project's active chat. The backend handles session management and context isolation internally.
 
@@ -52,14 +65,14 @@ The frontend interacts with the Project's active chat. The backend handles sessi
 6. Stream tokens back to Next.js using **Server-Sent Events (SSE)**.
 7. **On Completion**: Parse generated code, update `project_files`, and save a `Commit` snapshot.
 
-## 5. History & Rollback (`/api/projects/{projectId}/history`)
+## 6. History & Rollback (`/api/projects/{projectId}/history`)
 
 | Endpoint               | Method | Description                                                |
 |:-----------------------|:-------|:-----------------------------------------------------------|
 | `/commits`             | `GET`  | List all checkpoints (snapshots) for the project.          |
 | `/rollback/{commitId}` | `POST` | **Undo**: Revert `project_files` to this snapshot's state. |
 
-## 6. Preview (`/api/projects/{projectId}/preview`)
+## 7. Preview (`/api/projects/{projectId}/preview`)
 
 | Endpoint | Method   | Description                         |
 |:---------|:---------|:------------------------------------|
@@ -69,7 +82,7 @@ The frontend interacts with the Project's active chat. The backend handles sessi
 
 ---
 
-## 7. Implementation Tips
+## 8. Implementation Tips
 
 ### Server-Sent Events (SSE) in Spring Boot
 Use `SseEmitter` or return a `Flux<String>` (if using WebFlux).

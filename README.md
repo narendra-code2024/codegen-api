@@ -11,8 +11,6 @@ Backend API for the AI-driven code generation platform.
 * **MapStruct** & **Lombok** (DTO mapping and boilerplate generation)
 * **Spring Security & JJWT** (Stateless JWT authentication)
 
----
-
 ## Local Development via CLI
 
 The project includes the Maven Wrapper (`mvnw` for Linux/macOS and `mvnw.cmd` for Windows). This allows you to build, compile, and run the project from any terminal without needing a local installation of Maven.
@@ -75,8 +73,6 @@ Once packaged, you can run the application directly using standard Java:
 java -jar target/codegen-api-0.0.1-SNAPSHOT.jar
 ```
 
----
-
 ## Code Quality & Formatting
 
 To maintain a consistent style and catch potential bugs early, the project utilizes:
@@ -105,7 +101,9 @@ mvnw.cmd clean spotless:apply test spotbugs:check
 ```
 
 ## Documentation
-* [API Design](docs/API.md) — REST endpoints overview
-* [Auth Design](docs/AUTH.md) — Token delivery model and security
-* [Schema Design](docs/SCHEMA.md) — Database schema and entity relationships
-* [Postman Testing Setup](docs/POSTMAN.md) — Authentication flows and environment setup
+* [API Design](docs/api.md) — REST endpoints overview
+* [Auth Design](docs/auth.md) — Token delivery model and security
+* [Schema Design](docs/schema.md) — Database schema and entity relationships
+* [Postman Testing Setup](docs/postman.md) — Authentication flows and environment setup
+* [Coding Standards](docs/rules/coding-standards.md) — Layer boundaries, parameter ordering, and DTO validation
+* [Persistence Rules](docs/rules/persistence.md) — Database migrations, mapping conventions, and transactional guidelines

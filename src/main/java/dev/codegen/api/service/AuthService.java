@@ -9,7 +9,7 @@ import dev.codegen.api.exception.DuplicateResourceException;
 import dev.codegen.api.exception.ResourceNotFoundException;
 import dev.codegen.api.mapper.UserMapper;
 import dev.codegen.api.repository.UserRepository;
-import dev.codegen.api.security.TokenProvider;
+import dev.codegen.api.security.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,9 +30,9 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
 
-    private final TokenProvider tokenProvider;
-
     private final RefreshTokenService refreshTokenService;
+
+    private final AuthUtil authUtil;
 
     public UserResponse signup(SignupRequest req) {
         if (userRepository.findByEmail(req.email()).isPresent()) {
@@ -55,14 +55,14 @@ public class AuthService {
                         .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
 
         String refreshToken = refreshTokenService.createRefreshToken(user);
-        String accessToken = tokenProvider.generateAccessToken(user);
+        String accessToken = authUtil.generateAccessToken(user);
 
         return new AuthResponse(accessToken, refreshToken);
     }
 
     public AuthResponse refreshToken(String token) {
         RefreshTokenService.TokenRotation rotation = refreshTokenService.rotateToken(token);
-        String accessToken = tokenProvider.generateAccessToken(rotation.user());
+        String accessToken = authUtil.generateAccessToken(rotation.user());
         return new AuthResponse(accessToken, rotation.newRefreshToken());
     }
 
@@ -71,10 +71,10 @@ public class AuthService {
         refreshTokenService.revokeToken(refreshToken);
     }
 
-    public UserResponse getCurrentUser(String email) {
+    public UserResponse getCurrentUser() {
         User user =
                 userRepository
-                        .findByEmail(email)
+                        .findById(authUtil.getCurrentUserId())
                         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return userMapper.toResponse(user);
     }

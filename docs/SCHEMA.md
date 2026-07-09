@@ -6,66 +6,92 @@ This project uses **PostgreSQL** with an architecture optimized for an AI-driven
 
 ### `users`
 Handles user identity and authentication.
-- `id` (UUID, PK): Primary identifier.
-- `email` (VARCHAR, Unique): User email.
-- `password` (VARCHAR): Encrypted password.
-- `username` (VARCHAR): User's handle/display name.
-- `created_at` (TIMESTAMP): Creation time.
-- `updated_at` (TIMESTAMP): Last update time.
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `email` (VARCHAR, UNIQUE, NOT NULL): User email.
+- `password` (VARCHAR, NOT NULL): Encrypted password.
+- `username` (VARCHAR, NOT NULL): User's handle/display name.
+- `created_at` (TIMESTAMP, NOT NULL): Creation time.
+- `updated_at` (TIMESTAMP, NOT NULL): Last update time.
 - `deleted_at` (TIMESTAMP): Soft delete timestamp.
+
+### `refresh_tokens`
+Tracks active user session refresh tokens for authentication.
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `user_id` (UUID, FK, NOT NULL): Links to `users.id`.
+- `token` (VARCHAR, UNIQUE, NOT NULL): Secure refresh token string.
+- `expiry_date` (TIMESTAMP, NOT NULL): Expiration timestamp.
+- `created_at` (TIMESTAMP, NOT NULL): Creation time.
 
 ### `projects`
 The container for a generated application.
-- `id` (UUID, PK): Primary identifier.
-- `owner_id` (UUID, FK): Links to `users.id`.
-- `name` (VARCHAR): Project name.
-- `created_at`, `updated_at`, `deleted_at`: Audit fields.
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `name` (VARCHAR, NOT NULL): Project name.
+- `created_by_id` (UUID, FK, NOT NULL): Links to `users.id`. Represents the project owner/creator.
+- `created_at` (TIMESTAMP, NOT NULL): Creation time.
+- `updated_at` (TIMESTAMP, NOT NULL): Last update time.
+- `deleted_at` (TIMESTAMP): Soft delete timestamp.
+
+### `project_members`
+Maps users to projects with a role. Every project has exactly one member with `role=OWNER`.
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `project_id` (UUID, FK, NOT NULL): Links to `projects.id`.
+- `user_id` (UUID, FK, NOT NULL): Links to `users.id`.
+- `role` (VARCHAR, NOT NULL): `OWNER`, `EDITOR`, or `VIEWER`.
+- `created_at` (TIMESTAMP, NOT NULL): When the membership was created.
+- `updated_at` (TIMESTAMP, NOT NULL): Last update time.
+- `deleted_at` (TIMESTAMP): Soft delete timestamp.
+- **Constraint**: Unique on `(project_id, user_id)`.
 
 ### `chat_sessions`
 Groups conversation history for a project.
-- `id` (UUID, PK): Primary identifier.
-- `project_id` (UUID, FK): Links to `projects.id`.
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `project_id` (UUID, FK, NOT NULL): Links to `projects.id`.
 - `title` (VARCHAR): Optional title for the session.
-- `created_at`, `updated_at`: Audit fields.
+- `created_at` (TIMESTAMP, NOT NULL): Creation time.
+- `updated_at` (TIMESTAMP, NOT NULL): Last update time.
 
 ### `chat_messages`
 The individual messages within a chat session.
-- `id` (UUID, PK): Primary identifier.
-- `session_id` (UUID, FK): Links to `chat_sessions.id`.
-- `role` (VARCHAR): `user`, `assistant`, or `system`. (Persisted as lowercase).
-- `content` (TEXT): The message text or AI-generated response.
-- `prompt_tokens`, `completion_tokens` (INT): Usage tracking.
-- `created_at`: Creation time.
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `session_id` (UUID, FK, NOT NULL): Links to `chat_sessions.id`.
+- `role` (VARCHAR, NOT NULL): `user`, `assistant`, or `system`. (Persisted as lowercase).
+- `content` (TEXT, NOT NULL): The message text or AI-generated response.
+- `prompt_tokens` (INT): Prompt token count usage tracking.
+- `completion_tokens` (INT): Completion token count usage tracking.
+- `created_at` (TIMESTAMP, NOT NULL): Creation time.
 
 ### `project_files`
 Represents the current "Live" state of the codebase.
-- `id` (UUID, PK): Primary identifier.
-- `project_id` (UUID, FK): Links to `projects.id`.
-- `file_path` (VARCHAR): Unique path within the project (e.g., `src/App.tsx`).
-- `content` (TEXT): The raw source code (stored in-DB for fast context injection).
-- `storage_key` (VARCHAR): Nullable; used for binary assets (images, etc.).
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `project_id` (UUID, FK, NOT NULL): Links to `projects.id`.
+- `file_path` (VARCHAR, NOT NULL): Unique path within the project (e.g., `src/App.tsx`).
+- `content` (TEXT): The raw source code (stored in-DB for fast context injection). Nullable for deleted or empty files.
+- `storage_key` (VARCHAR): Used for binary assets (images, etc.).
 - `mime_type` (VARCHAR): File content type.
-- `updated_at`, `deleted_at`: Audit fields.
+- `updated_at` (TIMESTAMP, NOT NULL): Last update time.
+- `deleted_at` (TIMESTAMP): Soft delete timestamp.
 - **Constraint**: Unique on `(project_id, file_path)`.
 
 ### `commits`
 The snapshot engine for the "Undo" feature.
-- `id` (UUID, PK): Primary identifier.
-- `project_id` (UUID, FK): Links to `projects.id`.
-- `message_id` (UUID, FK): The `chat_messages.id` that triggered this version.
-- `snapshot_data` (JSONB): A complete map of `{ filePath: content }` at this point in time.
-- `created_at`: Creation time.
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `project_id` (UUID, FK, NOT NULL): Links to `projects.id`.
+- `message_id` (UUID, FK, NOT NULL): The `chat_messages.id` that triggered this version.
+- `snapshot_data` (JSONB, NOT NULL): A complete map of `{ filePath: content }` at this point in time.
+- `created_at` (TIMESTAMP, NOT NULL): Creation time.
 
 ### `previews`
 Tracks the execution environment for live previews.
-- `id` (UUID, PK): Primary identifier.
-- `project_id` (UUID, FK): Links to `projects.id`.
-- `preview_url` (VARCHAR): URL to access the preview.
-- `status` (VARCHAR): `STARTING`, `READY`, `STALLED`, `FAILED`, `EXPIRED`.
-- `started_at`, `expires_at`: Timing fields.
+- `id` (UUID, PK, NOT NULL): Primary identifier.
+- `project_id` (UUID, FK, NOT NULL): Links to `projects.id`.
+- `preview_url` (VARCHAR): URL to access the preview environment.
+- `status` (VARCHAR, NOT NULL): `STARTING`, `READY`, `STALLED`, `FAILED`, `EXPIRED`.
+- `started_at` (TIMESTAMP, NOT NULL): Start timestamp.
+- `expires_at` (TIMESTAMP): Expiry timestamp.
 
 ## 2. Relationships
-- **User 1:N Projects**: A user can own multiple projects.
+- **User N:M Projects**: A user can own (via `project_members` with `role=OWNER`) or be a member of multiple projects.
+- **Project 1:N Members**: A project has many members, each with a role.
 - **Project 1:N ChatSessions**: A project can have multiple conversations (managed internally).
 - **ChatSession 1:N ChatMessages**: Each session has a timeline of messages.
 - **Project 1:N Files**: A project contains many files (Live state).

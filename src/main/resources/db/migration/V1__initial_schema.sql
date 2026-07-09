@@ -5,10 +5,21 @@ CREATE TABLE users (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email             VARCHAR(255) NOT NULL UNIQUE,
     password          VARCHAR(255) NOT NULL,
-    username          VARCHAR(255),
+    username          VARCHAR(255) NOT NULL,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at        TIMESTAMP NULL
+);
+
+-- ============================================================
+-- 1B. REFRESH TOKENS
+-- ============================================================
+CREATE TABLE refresh_tokens (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token       VARCHAR(255) NOT NULL UNIQUE,
+    expiry_date TIMESTAMP NOT NULL,
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================
@@ -16,15 +27,32 @@ CREATE TABLE users (
 -- ============================================================
 CREATE TABLE projects (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_id          UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name              VARCHAR(255) NOT NULL,
+    created_by_id     UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at        TIMESTAMP NULL
 );
 
 -- ============================================================
--- 3. CHAT_SESSIONS
+-- 3. PROJECT MEMBERS
+-- ============================================================
+CREATE TABLE project_members (
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id        UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role              VARCHAR(20) NOT NULL,
+    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at        TIMESTAMP NULL,
+
+    CONSTRAINT unique_project_member UNIQUE (project_id, user_id)
+);
+
+CREATE UNIQUE INDEX unique_project_owner ON project_members (project_id) WHERE role = 'OWNER';
+
+-- ============================================================
+-- 4. CHAT_SESSIONS
 -- ============================================================
 CREATE TABLE chat_sessions (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -35,7 +63,7 @@ CREATE TABLE chat_sessions (
 );
 
 -- ============================================================
--- 4. CHAT_MESSAGES
+-- 5. CHAT_MESSAGES
 -- ============================================================
 CREATE TABLE chat_messages (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -48,7 +76,7 @@ CREATE TABLE chat_messages (
 );
 
 -- ============================================================
--- 5. PROJECT_FILES (Live Code State)
+-- 6. PROJECT_FILES (Live Code State)
 -- ============================================================
 CREATE TABLE project_files (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -64,7 +92,7 @@ CREATE TABLE project_files (
 );
 
 -- ============================================================
--- 6. COMMITS (The Snapshot Engine)
+-- 7. COMMITS (The Snapshot Engine)
 -- ============================================================
 CREATE TABLE commits (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -75,7 +103,7 @@ CREATE TABLE commits (
 );
 
 -- ============================================================
--- 7. PREVIEWS
+-- 8. PREVIEWS
 -- ============================================================
 CREATE TABLE previews (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),

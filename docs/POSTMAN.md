@@ -34,9 +34,6 @@ Body:
 ```
 Post-response script: same as login.
 
-**Me** — `GET /api/auth/me`
-No body needed. Returns current user profile.
-
 **Logout** — `POST /api/auth/logout`
 Body:
 ```json

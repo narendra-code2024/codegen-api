@@ -1,3 +1,5 @@
 package dev.codegen.api.dto.project;
 
-public record UpdateProjectRequest(String name) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record UpdateProjectRequest(@NotBlank String name) {}
