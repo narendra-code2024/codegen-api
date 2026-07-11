@@ -36,14 +36,16 @@ mvnw.cmd spring-boot:run
 ```
 
 ### 3. Database Migration & Management (Flyway)
-To clean or repair your database schema locally:
+To clean, migrate, or repair your database schema locally:
 ```bash
 # On Linux/macOS or Git Bash/PowerShell:
-./mvnw flyway:clean  # WARNING: NEVER run in production! (Drops all tables and data)
-./mvnw flyway:repair
+./mvnw flyway:clean    # WARNING: NEVER run in production! (Drops all tables and data)
+./mvnw flyway:migrate  # Runs all pending migration scripts
+./mvnw flyway:repair   # Fixes schema history checksum issues
 
 # On Windows Command Prompt:
 mvnw.cmd flyway:clean  # WARNING: NEVER run in production! (Drops all tables and data)
+mvnw.cmd flyway:migrate
 mvnw.cmd flyway:repair
 ```
 

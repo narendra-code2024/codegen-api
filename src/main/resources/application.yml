@@ -1,6 +1,8 @@
 spring:
   application:
     name: ai-builder
+  profiles:
+    default: local
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/codegen}
@@ -24,4 +26,7 @@ security:
     secret: ${JWT_SECRET:4a5e954fbc5218d6a365bb5a3bd96245e317c8052ebf337f7a14ad60c6d7a46e}
     expiration: ${JWT_EXPIRATION:900000}
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+seeder:
+  default-password: ${SEED_DEFAULT_PASSWORD:Password@123}
 

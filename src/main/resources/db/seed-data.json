@@ -1,0 +1,68 @@
+{
+  "users": [
+    {
+      "email": "alice@example.com",
+      "username": "alice"
+    },
+    {
+      "email": "charlie@example.com",
+      "username": "charlie"
+    },
+    {
+      "email": "dave@example.com",
+      "username": "dave"
+    },
+    {
+      "email": "james@example.com",
+      "username": "james"
+    },
+    {
+      "email": "naren@example.com",
+      "username": "naren"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Launch",
+      "createdByEmail": "alice@example.com",
+      "members": [
+        {
+          "email": "charlie@example.com",
+          "role": "VIEWER"
+        },
+        {
+          "email": "naren@example.com",
+          "role": "EDITOR"
+        }
+      ]
+    },
+    {
+      "name": "Project Flow",
+      "createdByEmail": "naren@example.com",
+      "members": [
+        {
+          "email": "alice@example.com",
+          "role": "EDITOR"
+        },
+        {
+          "email": "dave@example.com",
+          "role": "EDITOR"
+        }
+      ]
+    },
+    {
+      "name": "Project Core",
+      "createdByEmail": "charlie@example.com",
+      "members": [
+        {
+          "email": "james@example.com",
+          "role": "VIEWER"
+        },
+        {
+          "email": "naren@example.com",
+          "role": "EDITOR"
+        }
+      ]
+    }
+  ]
+}
