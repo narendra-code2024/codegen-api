@@ -83,6 +83,12 @@ public class ProjectInvitationService {
                 projectInvitationRepository
                         .findById(invitationId)
                         .orElseThrow(() -> new ResourceNotFoundException("Invitation not found"));
+
+        String currentUserEmail = authUtil.getCurrentUserEmail();
+        if (!invitation.getEmail().equalsIgnoreCase(currentUserEmail)) {
+            throw new ResourceNotFoundException("Invitation not found");
+        }
+
         return projectInvitationMapper.toResponse(invitation);
     }
 
