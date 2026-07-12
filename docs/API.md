@@ -38,7 +38,17 @@ Only the project `OWNER` can send invitations. Accepting invitations requires an
 
 > Roles: `OWNER` (full control), `EDITOR` (read/write), `VIEWER` (read-only). Only `EDITOR` or `VIEWER` roles can be invited.
 
-## 4. Project Files (`/api/projects/{projectId}/files`)
+## 4. Project Members (`/api/projects/{projectId}/members`)
+
+Any project member can list members. Only the project `OWNER` can change member roles or remove members.
+
+| Endpoint           | Method   | Description                                                           |
+|:-------------------|:---------|:----------------------------------------------------------------------|
+| `/`                | `GET`    | List all active members in the project (any member can access).       |
+| `/{memberId}`      | `PATCH`  | Update a member's role `{ "role" }` (OWNER only, EDITOR/VIEWER only). |
+| `/{memberId}`      | `DELETE` | Remove a member from the project (OWNER only).                        |
+
+## 5. Project Files (`/api/projects/{projectId}/files`)
 
 | Endpoint               | Method | Description                                   |
 |:-----------------------|:-------|:----------------------------------------------|
@@ -48,7 +58,7 @@ Only the project `OWNER` can send invitations. Accepting invitations requires an
 
 > **Why Query Params?** Using `?path=src/app/page.tsx` avoids issues with slashes (`/`) breaking REST routing and is the standard way to handle lookups for deeply nested resources.
 
-## 5. Chat & AI (`/api/projects/{projectId}/chat`)
+## 6. Chat & AI (`/api/projects/{projectId}/chat`)
 
 The frontend interacts with the Project's active chat. The backend handles session management and context isolation internally.
 
@@ -66,14 +76,14 @@ The frontend interacts with the Project's active chat. The backend handles sessi
 6. Stream tokens back to Next.js using **Server-Sent Events (SSE)**.
 7. **On Completion**: Parse generated code, update `project_files`, and save a `Commit` snapshot.
 
-## 6. History & Rollback (`/api/projects/{projectId}/history`)
+## 7. History & Rollback (`/api/projects/{projectId}/history`)
 
 | Endpoint               | Method | Description                                                |
 |:-----------------------|:-------|:-----------------------------------------------------------|
 | `/commits`             | `GET`  | List all checkpoints (snapshots) for the project.          |
 | `/rollback/{commitId}` | `POST` | **Undo**: Revert `project_files` to this snapshot's state. |
 
-## 7. Preview (`/api/projects/{projectId}/preview`)
+## 8. Preview (`/api/projects/{projectId}/preview`)
 
 | Endpoint | Method   | Description                         |
 |:---------|:---------|:------------------------------------|
@@ -83,7 +93,7 @@ The frontend interacts with the Project's active chat. The backend handles sessi
 
 ---
 
-## 8. Implementation Tips
+## 9. Implementation Tips
 
 ### Server-Sent Events (SSE) in Spring Boot
 Use `SseEmitter` or return a `Flux<String>` (if using WebFlux).
@@ -96,3 +106,4 @@ public Flux<String> chatStream(@PathVariable UUID projectId, @RequestBody String
 
 ### Type Safety
 Use **Swagger/OpenAPI** in Spring Boot to generate documentation, and use **Orval** or **openapi-ts** in Next.js to generate TypeScript hooks.
+
