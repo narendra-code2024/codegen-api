@@ -42,6 +42,17 @@ Maps users to projects with a role. Every project has exactly one member with `r
 - `deleted_at` (TIMESTAMP): Soft delete timestamp.
 - **Constraint**: Unique on `(project_id, user_id)`.
 
+### `project_invitations`
+Tracks pending project membership invitations. The primary key `id` serves as the secure invitation token.
+- `id` (UUID, PK, NOT NULL): Primary identifier (acts as the secure token).
+- `project_id` (UUID, FK, NOT NULL): Links to `projects.id`.
+- `email` (VARCHAR, NOT NULL): Target invited user email.
+- `role` (VARCHAR, NOT NULL): Invited role (`EDITOR` or `VIEWER`).
+- `status` (VARCHAR, NOT NULL): `PENDING`, `ACCEPTED`, `EXPIRED`, or `REVOKED`.
+- `invited_at` (TIMESTAMP, NOT NULL): Timestamp when the invitation was sent.
+- `expires_at` (TIMESTAMP, NOT NULL): Timestamp when the invitation expires.
+- **Constraint**: Unique on `(project_id, email)`.
+
 ### `chat_sessions`
 Groups conversation history for a project.
 - `id` (UUID, PK, NOT NULL): Primary identifier.

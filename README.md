@@ -108,4 +108,5 @@ mvnw.cmd clean spotless:apply test spotbugs:check
 * [Schema Design](docs/schema.md) — Database schema and entity relationships
 * [Postman Testing Setup](docs/postman.md) — Authentication flows and environment setup
 * [Coding Standards](docs/rules/coding-standards.md) — Layer boundaries, parameter ordering, and DTO validation
-* [Persistence Rules](docs/rules/persistence.md) — Database migrations, mapping conventions, and transactional guidelines
+* [Persistence Rules](docs/rules/persistence.md) — Database migrations and entity mapping conventions
+* [Transaction Management Rules](docs/rules/transactions.md) — Transaction boundaries, readOnly optimizations, and write atomic rules

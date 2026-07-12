@@ -10,6 +10,7 @@ Backend API for an AI-driven code generation platform.
 
 @docs/rules/coding-standards.md
 @docs/rules/persistence.md
+@docs/rules/transactions.md
 
 ## Agent Guardrails (Workflow)
 

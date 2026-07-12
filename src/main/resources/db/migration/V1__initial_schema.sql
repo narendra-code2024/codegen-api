@@ -109,7 +109,7 @@ CREATE TABLE previews (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id        UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     preview_url       VARCHAR(500),
-    status            VARCHAR(20) NOT NULL DEFAULT 'STARTING',
+    status            VARCHAR(20) NOT NULL,
     started_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expires_at        TIMESTAMP NULL
 );

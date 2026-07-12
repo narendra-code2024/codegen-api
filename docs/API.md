@@ -26,16 +26,17 @@ Access is controlled via membership. Any member (OWNER, EDITOR, VIEWER) can read
 | `/{id}`  | `PATCH`  | Update project metadata (e.g., rename).                                         |
 | `/{id}`  | `DELETE` | Soft-delete a project (OWNER only).                                             |
 
-## 3. Project Members (`/api/projects/{projectId}/members`)
+## 3. Project Invitations
 
-| Endpoint       | Method | Description                                      | Auth        |
-|:---------------|:-------|:-------------------------------------------------|:------------|
-| `/`            | `GET`  | List members of the project.                     | Any member  |
-| `/`            | `POST` | Invite a user by email `{ "email", "role" }`.    | OWNER only  |
-| `/{memberId}`  | `PATCH`| Change a member's role `{ "role" }`.             | OWNER only  |
-| `/{memberId}`  | `DELETE`| Remove a member from the project.               | OWNER only  |
+Only the project `OWNER` can send invitations. Accepting invitations requires an authenticated user.
 
-> Roles: `OWNER` (full control), `EDITOR` (read/write), `VIEWER` (read-only).
+| Endpoint                                 | Method | Description                                                |
+|:-----------------------------------------|:-------|:-----------------------------------------------------------|
+| `/projects/{projectId}/invitations`      | `POST` | Invite a user by email `{ "email", "role" }` (OWNER only). |
+| `/invitations/{id}`                      | `GET`  | Get metadata for a specific invitation.                    |
+| `/invitations/{id}/accept`               | `POST` | Accept the invitation, joining the project as a member.    |
+
+> Roles: `OWNER` (full control), `EDITOR` (read/write), `VIEWER` (read-only). Only `EDITOR` or `VIEWER` roles can be invited.
 
 ## 4. Project Files (`/api/projects/{projectId}/files`)
 

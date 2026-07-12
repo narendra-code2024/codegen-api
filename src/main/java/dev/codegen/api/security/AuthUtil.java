@@ -60,6 +60,15 @@ public class AuthUtil {
         return user.id();
     }
 
+    public String getCurrentUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null
+                || !(authentication.getPrincipal() instanceof CustomUserDetails user)) {
+            throw new AuthenticationCredentialsNotFoundException("No authenticated user");
+        }
+        return user.email();
+    }
+
     private SecretKey getSigningKey() {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);

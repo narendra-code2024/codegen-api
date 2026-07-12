@@ -7,7 +7,6 @@ import dev.codegen.api.entity.Project;
 import dev.codegen.api.exception.ResourceNotFoundException;
 import dev.codegen.api.mapper.ProjectMapper;
 import dev.codegen.api.repository.ProjectRepository;
-import dev.codegen.api.repository.UserRepository;
 import dev.codegen.api.security.AuthUtil;
 import java.time.Instant;
 import java.util.List;
@@ -24,7 +23,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     private final ProjectMemberService projectMemberService;
 
@@ -38,6 +37,18 @@ public class ProjectService {
         return projectMapper.toResponseList(projectRepository.getProjectsAccessibleByUser(userId));
     }
 
+    public ProjectResponse createProject(CreateProjectRequest req) {
+        UUID userId = authUtil.getCurrentUserId();
+
+        Project project = projectMapper.toEntity(req);
+        project.setCreatedBy(userService.getReferenceById(userId));
+        project = projectRepository.saveAndFlush(project);
+
+        projectMemberService.addOwner(project);
+
+        return projectMapper.toResponse(project);
+    }
+
     @PreAuthorize("@projectSecurity.isMember(#id)")
     @Transactional(readOnly = true)
     public ProjectResponse getProject(UUID id) {
@@ -45,18 +56,6 @@ public class ProjectService {
                 projectRepository
                         .findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
-        return projectMapper.toResponse(project);
-    }
-
-    public ProjectResponse createProject(CreateProjectRequest req) {
-        UUID userId = authUtil.getCurrentUserId();
-
-        Project project = projectMapper.toEntity(req);
-        project.setCreatedBy(userRepository.getReferenceById(userId));
-        project = projectRepository.saveAndFlush(project);
-
-        projectMemberService.addOwner(project);
-
         return projectMapper.toResponse(project);
     }
 
