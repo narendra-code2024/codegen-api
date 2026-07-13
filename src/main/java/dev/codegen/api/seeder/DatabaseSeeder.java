@@ -2,14 +2,17 @@ package dev.codegen.api.seeder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.codegen.api.entity.Project;
+import dev.codegen.api.entity.ProjectFile;
 import dev.codegen.api.entity.ProjectMember;
 import dev.codegen.api.entity.User;
 import dev.codegen.api.enums.ProjectMemberRole;
+import dev.codegen.api.repository.ProjectFileRepository;
 import dev.codegen.api.repository.ProjectMemberRepository;
 import dev.codegen.api.repository.ProjectRepository;
 import dev.codegen.api.repository.UserRepository;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +40,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectFileRepository projectFileRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
 
@@ -52,9 +56,14 @@ public class DatabaseSeeder implements CommandLineRunner {
     private record SeedUserDto(String email, String username) {}
 
     private record SeedProjectDto(
-            String name, String createdByEmail, List<SeedMemberDto> members) {}
+            String name,
+            String createdByEmail,
+            List<SeedMemberDto> members,
+            List<SeedFileDto> files) {}
 
     private record SeedMemberDto(String email, ProjectMemberRole role) {}
+
+    private record SeedFileDto(String filePath, String content) {}
 
     @Override
     @Transactional
@@ -78,8 +87,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             // 1. Seed Users
             Map<String, User> userEmailMap = seedUsers(seedData.users());
 
-            // 2. Seed Projects & Members
-            seedProjectsAndMembers(seedData.projects(), userEmailMap);
+            // 2. Seed Projects, Members & Files
+            seedProjectsMembersAndFiles(seedData.projects(), userEmailMap);
 
             log.info("Database seeding completed successfully.");
         } catch (IOException e) {
@@ -112,9 +121,9 @@ public class DatabaseSeeder implements CommandLineRunner {
         return userEmailMap;
     }
 
-    private void seedProjectsAndMembers(
+    private void seedProjectsMembersAndFiles(
             List<SeedProjectDto> projectDtos, Map<String, User> userEmailMap) {
-        log.info("Creating seed projects and members...");
+        log.info("Creating seed projects, members, and files...");
 
         if (projectDtos == null) {
             return;
@@ -152,6 +161,27 @@ public class DatabaseSeeder implements CommandLineRunner {
                     addMember(savedProject, memberUser, memberDto.role());
                 }
             }
+
+            // Seed files if defined for the project
+            if (projectDto.files() != null) {
+                for (SeedFileDto fileDto : projectDto.files()) {
+                    ProjectFile file = new ProjectFile();
+                    file.setProject(savedProject);
+                    file.setFilePath(fileDto.filePath());
+                    file.setContent(fileDto.content());
+                    file.setMimeType(resolveMimeType(fileDto.filePath()));
+                    file.setSize(
+                            fileDto.content() != null
+                                    ? fileDto.content().getBytes(StandardCharsets.UTF_8).length
+                                    : 0);
+                    projectFileRepository.save(file);
+                    log.info(
+                            "Seeded file {} for project {}",
+                            fileDto.filePath(),
+                            savedProject.getName());
+                }
+            }
+
             log.info(
                     "Seeded Project: {} (Owner: {})",
                     savedProject.getName(),
@@ -170,5 +200,24 @@ public class DatabaseSeeder implements CommandLineRunner {
                 user.getUsername(),
                 project.getName(),
                 role);
+    }
+
+    private String resolveMimeType(String filePath) {
+        if (filePath == null) {
+            return "text/plain";
+        }
+        String lower = filePath.toLowerCase();
+        if (lower.endsWith(".html")) return "text/html";
+        if (lower.endsWith(".css")) return "text/css";
+        if (lower.endsWith(".js") || lower.endsWith(".mjs")) return "application/javascript";
+        if (lower.endsWith(".ts")) return "application/typescript";
+        if (lower.endsWith(".jsx")) return "text/jsx";
+        if (lower.endsWith(".tsx")) return "text/tsx";
+        if (lower.endsWith(".json")) return "application/json";
+        if (lower.endsWith(".png")) return "image/png";
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+        if (lower.endsWith(".svg")) return "image/svg+xml";
+        if (lower.endsWith(".md")) return "text/markdown";
+        return "text/plain";
     }
 }

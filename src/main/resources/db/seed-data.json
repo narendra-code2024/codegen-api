@@ -34,6 +34,24 @@
           "email": "naren@example.com",
           "role": "EDITOR"
         }
+      ],
+      "files": [
+        {
+          "filePath": "package.json",
+          "content": "{\n  \"name\": \"seed-react-project\",\n  \"version\": \"1.0.0\",\n  \"dependencies\": {\n    \"react\": \"^18.2.0\",\n    \"react-dom\": \"^18.2.0\"\n  }\n}"
+        },
+        {
+          "filePath": "src/App.tsx",
+          "content": "import React from \"react\";\n\nexport default function App() {\n  return (\n    <div className=\"container\">\n      <h1>Hello from Seed React Project!</h1>\n    </div>\n  );\n}"
+        },
+        {
+          "filePath": "src/index.css",
+          "content": "body {\n  margin: 0;\n  font-family: sans-serif;\n  background-color: #f3f4f6;\n}\n.container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100vh;\n}"
+        },
+        {
+          "filePath": "public/index.html",
+          "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <title>React App</title>\n</head>\n<body>\n  <div id=\"root\"></div>\n</body>\n</html>"
+        }
       ]
     },
     {

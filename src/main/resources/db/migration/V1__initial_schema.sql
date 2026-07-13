@@ -85,6 +85,8 @@ CREATE TABLE project_files (
     content           TEXT,                   -- Store actual code here for fast AI context injection
     storage_key       VARCHAR(255),           -- Only use for images/binary assets
     mime_type         VARCHAR(100),
+    size              INTEGER NOT NULL DEFAULT 0,
+    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at        TIMESTAMP NULL,
     

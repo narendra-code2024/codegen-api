@@ -79,6 +79,8 @@ Represents the current "Live" state of the codebase.
 - `content` (TEXT): The raw source code (stored in-DB for fast context injection). Nullable for deleted or empty files.
 - `storage_key` (VARCHAR): Used for binary assets (images, etc.).
 - `mime_type` (VARCHAR): File content type.
+- `size` (INTEGER, NOT NULL): The file size in bytes.
+- `created_at` (TIMESTAMP, NOT NULL): Creation time.
 - `updated_at` (TIMESTAMP, NOT NULL): Last update time.
 - `deleted_at` (TIMESTAMP): Soft delete timestamp.
 - **Constraint**: Unique on `(project_id, file_path)`.

@@ -52,7 +52,7 @@ Any project member can list members. Only the project `OWNER` can change member 
 
 | Endpoint               | Method | Description                                   |
 |:-----------------------|:-------|:----------------------------------------------|
-| `/`                    | `GET`  | Fetch the current file tree and full content. |
+| `/`                    | `GET`  | Fetch the current file tree (metadata only).  |
 | `/content?path={path}` | `GET`  | Fetch content of a specific file by its path. |
 | `/download`            | `GET`  | Stream the entire project as a ZIP file.      |
 
