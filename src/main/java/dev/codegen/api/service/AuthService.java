@@ -1,6 +1,5 @@
 package dev.codegen.api.service;
 
-import dev.codegen.api.dto.auth.AuthResponse;
 import dev.codegen.api.dto.auth.LoginRequest;
 import dev.codegen.api.dto.auth.SignupRequest;
 import dev.codegen.api.dto.auth.UserResponse;
@@ -34,6 +33,8 @@ public class AuthService {
 
     private final AuthUtil authUtil;
 
+    public record AuthTokens(String accessToken, String refreshToken) {}
+
     public UserResponse signup(SignupRequest req) {
         if (userRepository.findByEmail(req.email()).isPresent()) {
             throw new DuplicateResourceException("Email is already registered");
@@ -45,7 +46,7 @@ public class AuthService {
         return userMapper.toResponse(user);
     }
 
-    public AuthResponse login(LoginRequest req) {
+    public AuthTokens login(LoginRequest req) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.email(), req.password()));
 
@@ -57,13 +58,13 @@ public class AuthService {
         String refreshToken = refreshTokenService.createRefreshToken(user);
         String accessToken = authUtil.generateAccessToken(user);
 
-        return new AuthResponse(accessToken, refreshToken);
+        return new AuthTokens(accessToken, refreshToken);
     }
 
-    public AuthResponse refreshToken(String token) {
+    public AuthTokens refreshToken(String token) {
         RefreshTokenService.TokenRotation rotation = refreshTokenService.rotateToken(token);
         String accessToken = authUtil.generateAccessToken(rotation.user());
-        return new AuthResponse(accessToken, rotation.newRefreshToken());
+        return new AuthTokens(accessToken, rotation.newRefreshToken());
     }
 
     @Transactional
